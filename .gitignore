@@ -1,6 +1,8 @@
-data
+data/traffic-signs-data
 .ipynb_checkpoints
 *.h5
 models
 *.swp
 *.p
+.idea
+.DS_Store
