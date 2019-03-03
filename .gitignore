@@ -6,3 +6,4 @@ models
 *.p
 .idea
 .DS_Store
+*.iml
