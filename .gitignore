@@ -7,3 +7,4 @@ models
 .idea
 .DS_Store
 *.iml
+*/__pycache__
