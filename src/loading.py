@@ -4,7 +4,8 @@
 import pickle
 from collections import namedtuple
 
-DataSet = namedtuple('DataSet', ['name', 'X', 'y', 'count'])
+from src.utils import DataSet
+
 Summary = namedtuple('Summary', ['n_train', 'n_validation', 'n_test', 'image_shape', 'n_classes'])
 
 TRAINING_DATA_SET_FILE = './data/traffic-signs-data/train.p'

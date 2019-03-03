@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 
+from src.utils import DataSet
+
 
 def rgb2gray(rgb):
     r, g, b = rgb[:, :, 0], rgb[:, :, 1], rgb[:, :, 2]
@@ -10,3 +12,8 @@ def rgb2gray(rgb):
     print(rgb.shape)
     print(gray.shape)
     return gray
+
+
+def normalise(data_set):
+    x = data_set.X / 255 - 0.5
+    return DataSet(data_set.name, x, data_set.y, data_set.count)

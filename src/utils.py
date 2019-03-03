@@ -3,11 +3,12 @@
 
 import pandas as pd
 from sklearn import utils
-
-from src.loading import DataSet
+from collections import namedtuple
 
 SIGN_NAMES_CSV = './data/signnames.csv'
 _SIGN_LABELS_MAP = {}
+
+DataSet = namedtuple('DataSet', ['name', 'X', 'y', 'count'])
 
 
 def read_sign_names_csv():

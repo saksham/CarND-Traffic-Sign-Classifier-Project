@@ -4,7 +4,7 @@ import tensorflow as tf
 from tensorflow.contrib.layers import flatten
 
 HYPER_PARAMETERS = {
-    'LEARNING_RATE': 0.01,
+    'LEARNING_RATE': 0.001,
     'EPOCHS': 10,
     'BATCH_SIZE': 128
 }
