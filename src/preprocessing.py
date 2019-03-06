@@ -100,8 +100,8 @@ class GaussianBlur(PreProcessingStep):
             x[i, :] = single_image
             blurred = cv2.blur(single_image.squeeze(), self.parameters['ksize'], self.parameters['sigma'])
             x[m + i, :] = blurred.reshape((w, h, c))
-            y[i] = y[i]
-            y[m + i] = y[i]
+            y[i] = data_set.y[i]
+            y[m + i] = data_set.y[i]
         return DataSet(data_set.name, x, y, data_set.count)
 
 
