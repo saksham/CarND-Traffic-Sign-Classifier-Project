@@ -4,13 +4,14 @@
 import pickle
 from collections import namedtuple
 
-from src.utils import DataSet
 
+DataSet = namedtuple('DataSet', ['name', 'X', 'y', 'count'])
 Summary = namedtuple('Summary', ['n_train', 'n_validation', 'n_test', 'image_shape', 'n_classes'])
 
 TRAINING_DATA_SET_FILE = './data/traffic-signs-data/train.p'
 VALIDATION_DATA_SET_FILE = './data/traffic-signs-data/valid.p'
 TEST_DATA_SET_FILE = './data/traffic-signs-data/test.p'
+SIGN_NAMES_CSV = './data/signnames.csv'
 
 
 def load_all():
@@ -35,12 +36,25 @@ def load_all():
         valid = pickle.load(f)
     with open(TEST_DATA_SET_FILE, mode='rb') as f:
         test = pickle.load(f)
+    read_sign_names_csv()
 
     training = DataSet('TRAINING', train['features'], train['labels'], len(train['labels']))
     validation = DataSet('VALIDATION', valid['features'], valid['labels'], len(valid['labels']))
     test = DataSet('TEST', test['features'], test['labels'], len(test['labels']))
 
     return training, validation, test
+
+
+def read_sign_names_csv():
+    result = {}
+    with open(SIGN_NAMES_CSV, 'r') as f:
+        line = f.readline()
+        while line != '':
+            line = f.readline()
+            tokens = line.split(',')
+            if len(tokens) == 2:
+                result[int(tokens[0])] = tokens[1].strip()
+    return result
 
 
 def summarize(training, validation, test):

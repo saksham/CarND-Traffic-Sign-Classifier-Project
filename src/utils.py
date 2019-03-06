@@ -1,30 +1,31 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import logging
+import os
+
 import pandas as pd
-from sklearn import utils
-from collections import namedtuple
 
-SIGN_NAMES_CSV = './data/signnames.csv'
-_SIGN_LABELS_MAP = {}
+from src import loading
 
-DataSet = namedtuple('DataSet', ['name', 'X', 'y', 'count'])
+FORMAT = '%(levelname)s %(message)s'
+LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
+
+_SIGN_LABELS_CACHE = {}
 
 
-def read_sign_names_csv():
-    with open(SIGN_NAMES_CSV, 'r') as f:
-        line = f.readline()
-        while line != '':
-            line = f.readline()
-            tokens = line.split(',')
-            if len(tokens) == 2:
-                _SIGN_LABELS_MAP[int(tokens[0])] = tokens[1].strip()
+def get_logger(source, level=LOG_LEVEL):
+    logger = logging.getLogger(source)
+    logging.basicConfig(format=FORMAT)
+    logger.setLevel(level)
+    return logger
 
 
 def get_sign_labels_map():
-    if not _SIGN_LABELS_MAP:
-        read_sign_names_csv()
-    return _SIGN_LABELS_MAP
+    global _SIGN_LABELS_CACHE
+    if not _SIGN_LABELS_CACHE:
+        _SIGN_LABELS_CACHE = loading.read_sign_names_csv()
+    return _SIGN_LABELS_CACHE
 
 
 def to_sign_label(code):
@@ -46,11 +47,3 @@ def group_labels_by_counts(data_set):
 
     sign_labels = get_sign_labels_dataframe()
     return sign_labels.merge(counts, on='code')
-
-
-def shuffle_data_set(data_set):
-    x, y = utils.shuffle(data_set.X, data_set.y)
-    return DataSet(data_set.name, x, y, data_set.count)
-
-
-read_sign_names_csv()
