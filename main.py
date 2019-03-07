@@ -3,19 +3,23 @@
 import tensorflow as tf
 from sklearn.utils import shuffle
 
-from src import lenet, loading, preprocessing
-from src.utils import get_logger
+from src import lenet, loading, preprocessing, augmentation
+from src.utils import get_logger, get_summary
 from src.lenet import HYPER_PARAMETERS
 
 logger = get_logger('main')
 
+logger.info('Loading data set...')
 training, validation, test = loading.load_all()
+logger.info(get_summary([training, validation, test]))
+
 training_data_augmenters = [
-    preprocessing.AffineTransformAugmenter(),
-    preprocessing.GaussianBlurAugmenter()
+    augmentation.AffineTransformAugmenter(),
+    augmentation.GaussianBlurAugmenter()
 ]
 logger.info('Augmenting training data...')
-training = preprocessing.Processor.apply(training, training_data_augmenters)
+training = preprocessing.PreProcessor.apply(training, training_data_augmenters)
+logger.info(get_summary([training]))
 
 preprocessors = [
     preprocessing.DataShuffler(),
@@ -24,7 +28,7 @@ preprocessors = [
     preprocessing.ZNormaliser(),
 ]
 logger.info('Pre-processing training and validation data sets...')
-training, validation = tuple(preprocessing.Processor.apply(d, preprocessors) for d in [training, validation])
+training, validation = tuple(preprocessing.PreProcessor.apply(d, preprocessors) for d in [training, validation])
 
 x = tf.placeholder(tf.float32, (None, 32, 32, 1))
 y = tf.placeholder(tf.int32, (None))

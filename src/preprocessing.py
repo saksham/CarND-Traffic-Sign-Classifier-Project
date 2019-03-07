@@ -1,50 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import json
-from abc import ABC
-from abc import abstractmethod
 
-import cv2
 import numpy as np
 from sklearn import utils
 
 from src.loading import DataSet
-from src.utils import get_logger
+from src.utils import get_logger, ParameterizedProcessor
 
 logger = get_logger('Pre-processor')
 
 
-class Processor(ABC):
-    def __init__(self, name, parameters=None):
-        self._name = name
-        self._parameters = parameters
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def parameters(self):
-        return self._parameters
-
-    @abstractmethod
-    def process(self, data_set):
-        raise Exception('Unimplemented')
-
-    @property
-    def info(self):
-        return {'name': self._name, 'parameters': self._parameters}
-
-    @staticmethod
-    def apply(data_set, steps):
-        for s in steps:
-            logger.info('Running {} on {} dataset...'.format(s.name, data_set.name))
-            logger.info('\tParameters: {}'.format(json.dumps(s.parameters)))
-            data_set = s.process(data_set)
-        return data_set
+class PreProcessor(ParameterizedProcessor):
+    def __init__(self, name, parameters):
+        super().__init__(name, parameters)
 
 
-class GrayScaleConverter(Processor):
+class GrayScaleConverter(ParameterizedProcessor):
     # OpenCV uses the following weights to convert to grayscale
     # https://docs.opencv.org/3.1.0/de/d25/imgproc_color_conversions.html
     PARAMETERS = {
@@ -73,7 +44,7 @@ class GrayScaleConverter(Processor):
         return DataSet(data_set.name, x, data_set.y, data_set.count)
 
 
-class MinMaxNormaliser(Processor):
+class MinMaxNormaliser(ParameterizedProcessor):
     def __init__(self):
         super().__init__('MIN_MAX_NORMALISATION')
 
@@ -82,7 +53,7 @@ class MinMaxNormaliser(Processor):
         return DataSet(data_set.name, x, data_set.y, data_set.count)
 
 
-class ZNormaliser(Processor):
+class ZNormaliser(ParameterizedProcessor):
     def __init__(self):
         super().__init__('Z_NORMALISATION')
         self._mean = None
@@ -98,43 +69,10 @@ class ZNormaliser(Processor):
         return DataSet(data_set.name, x, data_set.y, data_set.count)
 
 
-class DataShuffler(Processor):
+class DataShuffler(ParameterizedProcessor):
     def __init__(self):
         super().__init__('DATA_SHUFFLER')
 
     def process(self, data_set):
         x, y = utils.shuffle(data_set.X, data_set.y)
         return DataSet(data_set.name, x, y, data_set.count)
-
-
-class GaussianBlurAugmenter(Processor):
-    PARAMETERS = {
-        'ksize': (3, 3),
-        'sigma': 0
-    }
-
-    def __init__(self):
-        super().__init__('GAUSSIAN_BLUR', GaussianBlurAugmenter.PARAMETERS)
-
-    def process(self, data_set):
-        m, w, h, c = data_set.X.shape
-        x = np.zeros((2 * m, w, h, c))
-        y = np.zeros((2 * m))
-        for i in range(m):
-            single_image = data_set.X[i, :]
-            x[i, :] = single_image
-            blurred = cv2.blur(single_image.squeeze(), self.parameters['ksize'], self.parameters['sigma'])
-            x[m + i, :] = blurred.reshape((w, h, c))
-            y[i] = data_set.y[i]
-            y[m + i] = data_set.y[i]
-        return DataSet(data_set.name, x, y, data_set.count)
-
-
-class AffineTransformAugmenter(Processor):
-    def __init__(self):
-        super().__init__('AFFINE_TRANSFORM_AUGMENTER')
-
-    def process(self, data_set):
-        return data_set
-
-# z-normalization

@@ -6,7 +6,6 @@ from collections import namedtuple
 
 
 DataSet = namedtuple('DataSet', ['name', 'X', 'y', 'count'])
-Summary = namedtuple('Summary', ['n_train', 'n_validation', 'n_test', 'image_shape', 'n_classes'])
 
 TRAINING_DATA_SET_FILE = './data/traffic-signs-data/train.p'
 VALIDATION_DATA_SET_FILE = './data/traffic-signs-data/valid.p'
@@ -55,18 +54,3 @@ def read_sign_names_csv():
             if len(tokens) == 2:
                 result[int(tokens[0])] = tokens[1].strip()
     return result
-
-
-def summarize(training, validation, test):
-    n_train = len(training.y)
-    n_validation = len(validation.y)
-    n_test = len(test.y)
-    image_shape = training.X[0].shape
-    n_classes = len(set(training.y).union(set(validation.y)).union(set(test.y)))
-
-    print("Number of training examples =", n_train)
-    print("Number of validation examples =", n_validation)
-    print("Number of testing examples =", n_test)
-    print("Image data shape =", image_shape)
-    print("Number of classes =", n_classes)
-    return Summary(n_train, n_validation, n_test, image_shape, n_classes)

@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import json
 import logging
 import logging.handlers
 import os
 import sys
+from abc import ABC, abstractmethod
 
 import pandas as pd
 
@@ -20,7 +22,6 @@ _SIGN_LABELS_CACHE = {}
 def get_logger(source, level=LOG_LEVEL):
     formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
                                   datefmt='%Y-%m-%d %H:%M:%S')
-    logging.basicConfig(format=FORMAT)
     file_handler = logging.handlers.RotatingFileHandler(LOG_FILE_PATH, 'a', 10 * 1024 * 1024)
     file_handler.setFormatter(formatter)
     screen_handler = logging.StreamHandler(stream=sys.stdout)
@@ -30,6 +31,38 @@ def get_logger(source, level=LOG_LEVEL):
     logger.addHandler(file_handler)
     logger.addHandler(screen_handler)
     return logger
+
+
+class ParameterizedProcessor(ABC):
+    _logger = get_logger('Parameterized processor')
+
+    def __init__(self, name, parameters=None):
+        self._name = name
+        self._parameters = parameters
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def parameters(self):
+        return self._parameters
+
+    @abstractmethod
+    def process(self, data_set):
+        raise Exception('Unimplemented')
+
+    @property
+    def info(self):
+        return {'name': self._name, 'parameters': self._parameters}
+
+    @staticmethod
+    def apply(data_set, steps):
+        for s in steps:
+            ParameterizedProcessor._logger.info('Running {} on {} dataset...'.format(s.name, data_set.name))
+            ParameterizedProcessor._logger.info('\tParameters: {}'.format(json.dumps(s.parameters)))
+            data_set = s.process(data_set)
+        return data_set
 
 
 def get_sign_labels_map():
@@ -58,3 +91,18 @@ def group_labels_by_counts(data_set):
 
     sign_labels = get_sign_labels_dataframe()
     return sign_labels.merge(counts, on='code')
+
+
+def get_summary(data_sets):
+    summary = {}
+    all_classes = set()
+
+    for data_set in data_sets:
+        summary[data_set.name] = {
+            'number-of-examples': data_set.count,
+            'image-shape': data_set.X[0].shape,
+            'no-of-classes': len(set(data_set.y))
+        }
+        all_classes.union(set(data_set.y))
+    summary['total-no-of-classes'] = len(all_classes)
+    return summary
