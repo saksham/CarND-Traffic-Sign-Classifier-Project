@@ -50,8 +50,8 @@ class AffineTransformAugmenter(ParameterizedProcessor):
         h, w, _ = image.shape
         px = AffineTransformAugmenter.PARAMETERS['PX']
         dx, dy = np.random.randint(-px, px, 2)
-        M = np.float32([[1, 0, dx], [0, 1, dy]])
-        return cv2.warpAffine(image.squeeze(), M, (h, w))
+        augmented_matrix = np.float32([[1, 0, dx], [0, 1, dy]])
+        return cv2.warpAffine(image.squeeze(), augmented_matrix, (h, w))
 
     def process(self, data_set):
         return augment(data_set, AffineTransformAugmenter._affine_transform)

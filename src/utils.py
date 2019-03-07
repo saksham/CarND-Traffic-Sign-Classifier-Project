@@ -8,6 +8,7 @@ import os
 import sys
 from abc import ABC, abstractmethod
 
+import cv2
 import pandas as pd
 
 from src import loading
@@ -103,9 +104,22 @@ def get_summary(data_sets):
             'image-shape': data_set.X[0].shape,
             'no-of-classes': len(set(data_set.y))
         }
-        all_classes.union(set(data_set.y))
+        all_classes = all_classes.union(set(data_set.y))
     summary['total-no-of-classes'] = len(all_classes)
     return summary
 
-def image_to_tensor(image_path):
-    img = cv.imread(image_path)
+
+def read_image_for_lenet(image_path):
+    """
+    https://docs.opencv.org/3.0-beta/modules/imgcodecs/doc/reading_and_writing_images.html#imread
+    Apparently
+    - cv2.imread() => BGR
+    - matplotlib.image.imread() => RGB
+
+    :param image_path:
+    :return:
+    """
+    img = cv2.imread(image_path)
+    rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    return cv2.resize(rgb, (32, 32), interpolation=cv2.INTER_LANCZOS4)
+
