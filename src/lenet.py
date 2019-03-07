@@ -5,9 +5,9 @@ from tensorflow.contrib.layers import flatten
 
 HYPER_PARAMETERS = {
     'LEARNING_RATE': 0.001,
-    'EPOCHS': 40,
+    'EPOCHS': 60,
     'BATCH_SIZE': 128,
-    'KEEP_PROBABILITY': 0.7,
+    'KEEP_PROBABILITY': 0.70,
     'mu': 0,
     'sigma': 0.1
 }
@@ -29,7 +29,7 @@ def setup_training_pipeline(x, y):
     one_hot_y = tf.one_hot(y, 43)
 
     logits = LeNet(x)
-    cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=one_hot_y, logits=logits)
+    cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=one_hot_y, logits=logits)
     loss_operation = tf.reduce_mean(cross_entropy)
     optimizer = tf.train.AdamOptimizer(learning_rate=HYPER_PARAMETERS['LEARNING_RATE'])
     training_operation = optimizer.minimize(loss_operation)
@@ -124,6 +124,8 @@ def LeNet(x):
 
     # Layer 4: Activation.
     fc2 = tf.nn.relu(fc2)
+
+    fc2 = tf.nn.dropout(fc2, HYPER_PARAMETERS['KEEP_PROBABILITY'])
 
     # Layer 5: Fully Connected. Input = 84. Output = 43.
     fc3_W = tf.Variable(tf.truncated_normal(shape=(84, 43), mean=(HYPER_PARAMETERS['mu']), stddev=(

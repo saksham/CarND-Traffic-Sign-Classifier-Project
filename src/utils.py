@@ -106,3 +106,6 @@ def get_summary(data_sets):
         all_classes.union(set(data_set.y))
     summary['total-no-of-classes'] = len(all_classes)
     return summary
+
+def image_to_tensor(image_path):
+    img = cv.imread(image_path)

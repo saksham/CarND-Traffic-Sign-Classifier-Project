@@ -24,7 +24,7 @@ logger.info(get_summary([training]))
 preprocessors = [
     preprocessing.DataShuffler(),
     preprocessing.GrayScaleConverter(),
-    preprocessing.MinMaxNormaliser(),
+#    preprocessing.MinMaxNormaliser(),
     preprocessing.ZNormaliser(),
 ]
 logger.info('Pre-processing training and validation data sets...')

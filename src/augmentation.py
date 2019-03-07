@@ -39,7 +39,7 @@ class GaussianBlurAugmenter(ParameterizedProcessor):
 
 class AffineTransformAugmenter(ParameterizedProcessor):
     PARAMETERS = {
-        'PX': 2
+        'PX': 4
     }
 
     def __init__(self):
@@ -55,3 +55,4 @@ class AffineTransformAugmenter(ParameterizedProcessor):
 
     def process(self, data_set):
         return augment(data_set, AffineTransformAugmenter._affine_transform)
+
