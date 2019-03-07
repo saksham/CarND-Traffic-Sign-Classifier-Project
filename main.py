@@ -10,10 +10,10 @@ preprocessors = [
     preprocessing.DataShuffler(),
     preprocessing.MinMaxNormaliser(),
     preprocessing.GrayScaleConverter(),
-    preprocessing.GaussianBlur()
+    preprocessing.GaussianBlurAugmenter()
 ]
 training, validation, test = tuple(
-    preprocessing.PreProcessingStep.apply(d, preprocessors) for d in [training, validation, test])
+    preprocessing.Processor.apply(d, preprocessors) for d in [training, validation, test])
 print(training.X[0].shape)
 from matplotlib import pyplot as plt
 

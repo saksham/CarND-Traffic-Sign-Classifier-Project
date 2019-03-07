@@ -14,7 +14,7 @@ from src.utils import get_logger
 logger = get_logger('Pre-processor')
 
 
-class PreProcessingStep(ABC):
+class Processor(ABC):
     def __init__(self, name, parameters=None):
         self._name = name
         self._parameters = parameters
@@ -44,7 +44,7 @@ class PreProcessingStep(ABC):
         return data_set
 
 
-class GrayScaleConverter(PreProcessingStep):
+class GrayScaleConverter(Processor):
     # OpenCV uses the following weights to convert to grayscale
     # https://docs.opencv.org/3.1.0/de/d25/imgproc_color_conversions.html
     PARAMETERS = {
@@ -73,23 +73,48 @@ class GrayScaleConverter(PreProcessingStep):
         return DataSet(data_set.name, x, data_set.y, data_set.count)
 
 
-class MinMaxNormaliser(PreProcessingStep):
+class MinMaxNormaliser(Processor):
     def __init__(self):
-        super().__init__('NORMALISE')
+        super().__init__('MIN_MAX_NORMALISATION')
 
     def process(self, data_set):
         x = (data_set.X - 128) / 128
         return DataSet(data_set.name, x, data_set.y, data_set.count)
 
 
-class GaussianBlur(PreProcessingStep):
+class ZNormaliser(Processor):
+    def __init__(self):
+        super().__init__('Z_NORMALISATION')
+        self._mean = None
+        self._sigma = None
+
+    def process(self, data_set):
+        if not self._mean:
+            logger.info('No means were calculated yet. Using score and mean from {}...'.format(data_set.name))
+            self._mean = np.mean(data_set.X)
+            self._sigma = np.std(data_set.X)
+        logger.info('Normalising with mean: {} and sigma: {}...'.format(self._mean, self._sigma))
+        x = (data_set.X - self._mean) / self._sigma
+        return DataSet(data_set.name, x, data_set.y, data_set.count)
+
+
+class DataShuffler(Processor):
+    def __init__(self):
+        super().__init__('DATA_SHUFFLER')
+
+    def process(self, data_set):
+        x, y = utils.shuffle(data_set.X, data_set.y)
+        return DataSet(data_set.name, x, y, data_set.count)
+
+
+class GaussianBlurAugmenter(Processor):
     PARAMETERS = {
         'ksize': (3, 3),
         'sigma': 0
     }
 
     def __init__(self):
-        super().__init__('GAUSSIAN_BLUR', GaussianBlur.PARAMETERS)
+        super().__init__('GAUSSIAN_BLUR', GaussianBlurAugmenter.PARAMETERS)
 
     def process(self, data_set):
         m, w, h, c = data_set.X.shape
@@ -105,10 +130,11 @@ class GaussianBlur(PreProcessingStep):
         return DataSet(data_set.name, x, y, data_set.count)
 
 
-class DataShuffler(PreProcessingStep):
+class AffineTransformAugmenter(Processor):
     def __init__(self):
-        super().__init__('DATA_SHUFFLER')
+        super().__init__('AFFINE_TRANSFORM_AUGMENTER')
 
     def process(self, data_set):
-        x, y = utils.shuffle(data_set.X, data_set.y)
-        return DataSet(data_set.name, x, y, data_set.count)
+        return data_set
+
+# z-normalization
