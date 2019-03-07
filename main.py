@@ -9,6 +9,7 @@ from src.utils import get_logger, get_summary
 
 logger = get_logger('main')
 
+logger.info('-' * 200)
 logger.info('Loading data set...')
 training, validation, test = loading.load_all()
 logger.info(get_summary([training, validation, test]))
