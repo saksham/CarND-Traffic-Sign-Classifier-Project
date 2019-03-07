@@ -38,8 +38,8 @@ class Processor(ABC):
     @staticmethod
     def apply(data_set, steps):
         for s in steps:
-            logger.info('Running preprocessing step {} on {} dataset...'.format(s.name, data_set.name))
-            logger.info('Parameters: {}'.format(json.dumps(s.parameters)))
+            logger.info('Running {} on {} dataset...'.format(s.name, data_set.name))
+            logger.info('\tParameters: {}'.format(json.dumps(s.parameters)))
             data_set = s.process(data_set)
         return data_set
 

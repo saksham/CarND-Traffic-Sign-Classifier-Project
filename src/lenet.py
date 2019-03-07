@@ -5,8 +5,11 @@ from tensorflow.contrib.layers import flatten
 
 HYPER_PARAMETERS = {
     'LEARNING_RATE': 0.001,
-    'EPOCHS': 10,
-    'BATCH_SIZE': 128
+    'EPOCHS': 40,
+    'BATCH_SIZE': 128,
+    'KEEP_PROBABILITY': 0.7,
+    'mu': 0,
+    'sigma': 0.1
 }
 
 
@@ -26,6 +29,7 @@ def setup_training_pipeline(x, y):
     one_hot_y = tf.one_hot(y, 43)
 
     logits = LeNet(x)
+    # TODO: See @{tf.nn.softmax_cross_entropy_with_logits_v2}.
     cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=one_hot_y, logits=logits)
     loss_operation = tf.reduce_mean(cross_entropy)
     optimizer = tf.train.AdamOptimizer(learning_rate=HYPER_PARAMETERS['LEARNING_RATE'])
@@ -66,8 +70,8 @@ def LeNet(x):
     :return: logits
     """
     # Hyper parameters
-    mu = 0
-    sigma = 0.1
+    mu = HYPER_PARAMETERS['mu']
+    sigma = HYPER_PARAMETERS['sigma']
 
     # Layer 1: Convolutional. Input: 32x32x3, Output: 28x28x6
     conv1_W = tf.Variable(tf.truncated_normal(shape=(5, 5, 1, 6), mean=mu, stddev=sigma))
@@ -76,6 +80,9 @@ def LeNet(x):
 
     # Layer 1: Activation
     conv1 = tf.nn.relu(conv1)
+
+    # Layer 1: Dropout
+    conv1 = tf.nn.dropout(conv1, HYPER_PARAMETERS['KEEP_PROBABILITY'])
 
     # Layer 1: Pooling. Input: 28x28x6, Output: 14x14x6
     conv1 = tf.nn.max_pool(conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='VALID')
@@ -87,6 +94,9 @@ def LeNet(x):
 
     # Layer 2: Activation.
     conv2 = tf.nn.relu(conv2)
+
+    # Dropout
+    conv2 = tf.nn.dropout(conv2, HYPER_PARAMETERS['KEEP_PROBABILITY'])
 
     # Layer 2: Pooling. Input = 10x10x16. Output = 5x5x16.
     conv2 = tf.nn.max_pool(conv2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='VALID')
@@ -101,6 +111,9 @@ def LeNet(x):
 
     # Layer 3: Activation.
     fc1 = tf.nn.relu(fc1)
+
+    # Dropout
+    fc1 = tf.nn.dropout(fc1, HYPER_PARAMETERS['KEEP_PROBABILITY'])
 
     # Layer 4: Fully Connected. Input = 120. Output = 84.
     fc2_W = tf.Variable(tf.truncated_normal(shape=(120, 84), mean=mu, stddev=sigma))

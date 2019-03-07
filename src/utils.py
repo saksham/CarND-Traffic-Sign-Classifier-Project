@@ -2,22 +2,33 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import logging.handlers
 import os
+import sys
 
 import pandas as pd
 
 from src import loading
 
-FORMAT = '%(levelname)s %(message)s'
+LOG_FILE_PATH = 'data/logs/runs.txt'
+FORMAT = '[%(asctime)s] %(levelname)s %(message)s'
 LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
 
 _SIGN_LABELS_CACHE = {}
 
 
 def get_logger(source, level=LOG_LEVEL):
-    logger = logging.getLogger(source)
+    formatter = logging.Formatter(fmt='%(asctime)s %(levelname)-8s %(message)s',
+                                  datefmt='%Y-%m-%d %H:%M:%S')
     logging.basicConfig(format=FORMAT)
+    file_handler = logging.handlers.RotatingFileHandler(LOG_FILE_PATH, 'a', 10 * 1024 * 1024)
+    file_handler.setFormatter(formatter)
+    screen_handler = logging.StreamHandler(stream=sys.stdout)
+    screen_handler.setFormatter(formatter)
+    logger = logging.getLogger(source)
     logger.setLevel(level)
+    logger.addHandler(file_handler)
+    logger.addHandler(screen_handler)
     return logger
 
 
