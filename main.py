@@ -11,8 +11,8 @@ logger = get_logger('main')
 
 logger.info('-' * 200)
 logger.info('Loading data set...')
-training, validation, test = loading.load_all()
-logger.info(get_summary([training, validation, test]))
+training, validation = loading.load_all()
+logger.info(get_summary([training, validation]))
 
 training_data_augmenters = [
     augmentation.HorizontalFlipper(),
@@ -34,7 +34,7 @@ x = tf.placeholder(tf.float32, (None, 32, 32, 1))
 y = tf.placeholder(tf.int32, (None))
 mode = tf.placeholder(tf.string, (None))
 
-training_operation, accuracy_operation, logits = lenet.setup_training_pipeline(x, y, mode)
+training_operation, accuracy_operation, logits = lenet.setup_graph(x, y, mode)
 
 logger.info('Hyper-parameters: %s', HYPER_PARAMETERS)
 
@@ -60,4 +60,4 @@ with tf.Session() as sess:
         print()
 
     saver.save(sess, './data/model/lenet')
-    print("Model saved")
+    logger.info("Model saved")
