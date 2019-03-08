@@ -81,7 +81,7 @@ def LeNet(x, mode):
     :return: logits
     """
     predicting_mode = tf.constant(Mode.PREDICTING.value)
-    keep_probability = tf.cond(tf.math.equal(mode, predicting_mode),
+    keep_probability = tf.cond(tf.equal(mode, predicting_mode),
                                lambda : HYPER_PARAMETERS['KEEP_PROBABILITY_DURING_TRAINING'], lambda : 1.0)
     logger.info('Running LeNet in {} mode with keep probability of {}...'.format(mode, keep_probability))
 
