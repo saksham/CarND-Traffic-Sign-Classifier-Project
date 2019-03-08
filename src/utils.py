@@ -4,12 +4,14 @@
 import json
 import logging
 import logging.handlers
+import math
 import os
 import sys
 from abc import ABC, abstractmethod
 
 import cv2
 import pandas as pd
+from matplotlib import pyplot as plt
 
 from src import loading
 
@@ -121,5 +123,19 @@ def read_image_for_lenet(image_path):
     """
     img = cv2.imread(image_path)
     rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    return cv2.resize(rgb, (32, 32), interpolation=cv2.INTER_LANCZOS4)
+    return cv2.resize(rgb, (32, 32), interpolation=cv2.INTER_CUBIC)
 
+
+def plot_and_save(images, labels, filepath, n_cols=3):
+    n_rows = int(math.ceil(len(images) / float(n_cols)))
+    fig, axs = plt.subplots(n_rows, n_cols, figsize=(20, 20))
+    fig.subplots_adjust(hspace=.2, wspace=.01)
+    axs = axs.ravel()
+    for i in range(n_rows * n_cols):
+        axs[i].axis('off')
+        if i < len(images):
+            c_map = 'gray' if images[i].ndim == 2 else None
+            axs[i].imshow(images[i], cmap=c_map)
+            axs[i].set_title(labels[i])
+
+    plt.savefig(filepath)

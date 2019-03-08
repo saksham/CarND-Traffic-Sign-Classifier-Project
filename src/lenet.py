@@ -37,7 +37,7 @@ def evaluation(X_data, y_data, x, y, mode, accuracy_operation):
     return total_accuracy / num_examples
 
 
-def setup_training_pipeline(x, y, mode):
+def setup_graph(x, y, mode):
     one_hot_y = tf.one_hot(y, 43)
 
     logits = LeNet(x, mode)

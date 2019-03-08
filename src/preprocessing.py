@@ -64,7 +64,7 @@ class ZNormaliser(ParameterizedProcessor):
             logger.info('No means were calculated yet. Using score and mean from {}...'.format(data_set.name))
             self._mean = np.mean(data_set.X)
             self._sigma = np.std(data_set.X)
-        logger.info('Normalising with mean: {} and sigma: {}...'.format(self._mean, self._sigma))
+        logger.info('Normalising {} with mean: {} and sigma: {}...'.format(data_set.name, self._mean, self._sigma))
         x = (data_set.X - self._mean) / self._sigma
         return DataSet(data_set.name, x, data_set.y, data_set.count)
 

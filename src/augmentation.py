@@ -39,7 +39,7 @@ class GaussianBlurAugmenter(ParameterizedProcessor):
 
 class AffineTransformAugmenter(ParameterizedProcessor):
     PARAMETERS = {
-        'PX': 4
+        'PIXELS': 4
     }
 
     def __init__(self):
@@ -48,7 +48,7 @@ class AffineTransformAugmenter(ParameterizedProcessor):
     @staticmethod
     def _affine_transform(image):
         h, w, _ = image.shape
-        px = AffineTransformAugmenter.PARAMETERS['PX']
+        px = AffineTransformAugmenter.PARAMETERS['PIXELS']
         dx, dy = np.random.randint(-px, px, 2)
         augmented_matrix = np.float32([[1, 0, dx], [0, 1, dy]])
         return cv2.warpAffine(image.squeeze(), augmented_matrix, (h, w))
@@ -56,3 +56,10 @@ class AffineTransformAugmenter(ParameterizedProcessor):
     def process(self, data_set):
         return augment(data_set, AffineTransformAugmenter._affine_transform)
 
+
+class HorizontalFlipper(ParameterizedProcessor):
+    def __init__(self):
+        super().__init__('HORIZONTAL_FLIPPER', AffineTransformAugmenter.PARAMETERS)
+
+    def process(self, data_set):
+        return augment(data_set, lambda img: cv2.flip(img, 0))

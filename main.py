@@ -15,6 +15,7 @@ training, validation, test = loading.load_all()
 logger.info(get_summary([training, validation, test]))
 
 training_data_augmenters = [
+    augmentation.HorizontalFlipper(),
     augmentation.AffineTransformAugmenter(),
     augmentation.GaussianBlurAugmenter()
 ]
@@ -23,9 +24,7 @@ training = preprocessing.PreProcessor.apply(training, training_data_augmenters)
 logger.info(get_summary([training]))
 
 preprocessors = [
-    preprocessing.DataShuffler(),
     preprocessing.GrayScaleConverter(),
-    #    preprocessing.MinMaxNormaliser(),
     preprocessing.ZNormaliser(),
 ]
 logger.info('Pre-processing training and validation data sets...')
