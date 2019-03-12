@@ -46,7 +46,10 @@ class GaussianBlurAugmenter(ParameterizedProcessor):
 
 class AffineTransformAugmenter(ParameterizedProcessor):
     PARAMETERS = {
-        'PIXELS': 4
+        'TRANSLATION': [-2, 2],
+        'SCALE': [0.9, 1.1],
+        'ROTATION': [-15, +15] #TODO: use rotation
+
     }
 
     def __init__(self):
@@ -55,10 +58,12 @@ class AffineTransformAugmenter(ParameterizedProcessor):
     @staticmethod
     def _affine_transform(image):
         h, w, _ = image.shape
-        px = AffineTransformAugmenter.PARAMETERS['PIXELS']
-        dx, dy = np.random.randint(-px, px, 2)
-        augmented_matrix = np.float32([[1, 0, dx], [0, 1, dy]])
-        return cv2.warpAffine(image.squeeze(), augmented_matrix, (h, w))
+        scale = AffineTransformAugmenter.PARAMETERS['SCALE']
+        s = np.random.rand(1) * (scale[1] - scale[0]) + scale[0]
+        translation = AffineTransformAugmenter.PARAMETERS['TRANSLATION']
+        dx, dy = np.random.randint(translation[0], translation[1], 2)
+        M = np.float32([[s, 0, dx], [0, s, dy]])
+        return cv2.warpAffine(image.squeeze(), M, (h, w))
 
     def process(self, data_set):
         return augment(data_set, AffineTransformAugmenter._affine_transform)
