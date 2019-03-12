@@ -10,7 +10,7 @@ logger = utils.get_logger('main')
 
 logger.info('-' * 200)
 logger.info('Loading data set...')
-training, validation = loading.load_all()
+training, validation, test = loading.load_all()
 logger.info(utils.get_summary([training, validation]))
 
 # List of enabled data augmenters for training data set
