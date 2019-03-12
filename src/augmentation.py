@@ -10,6 +10,13 @@ from src.utils import get_logger, ParameterizedProcessor
 logger = get_logger('augmentation')
 
 
+def augment_data_set(data_set, augmenters):
+    result = DataSet(data_set.name, data_set.X, data_set.y, data_set.count)
+    for augmenter in augmenters:
+        result = augmenter.process(result)
+    return result
+
+
 def augment(data_set, transform_func):
     m, h, w, c = data_set.X.shape
     x = np.zeros((2 * m, h, w, c))
@@ -21,7 +28,7 @@ def augment(data_set, transform_func):
         x[m + i, :] = transformed.reshape((h, w, c))
         y[i] = data_set.y[i]
         y[m + i] = data_set.y[i]
-    return DataSet(data_set.name, x, y, data_set.count)
+    return DataSet(data_set.name, x, y, data_set.count * 2)
 
 
 class GaussianBlurAugmenter(ParameterizedProcessor):
@@ -59,7 +66,31 @@ class AffineTransformAugmenter(ParameterizedProcessor):
 
 class HorizontalFlipper(ParameterizedProcessor):
     def __init__(self):
-        super().__init__('HORIZONTAL_FLIPPER', AffineTransformAugmenter.PARAMETERS)
+        super().__init__('HORIZONTAL_FLIPPER')
 
     def process(self, data_set):
         return augment(data_set, lambda img: cv2.flip(img, 0))
+
+
+class RandomScalerAugmenter(ParameterizedProcessor):
+    PARAMETERS = {
+        'max-width': 40,
+        'interpolation': cv2.INTER_LANCZOS4
+    }
+
+    def __init__(self):
+        super().__init__('RANDOM_SCALER', RandomScalerAugmenter.PARAMETERS)
+
+    def _scale_randomly(self, image):
+        target_size = np.random.randint(32, RandomScalerAugmenter.PARAMETERS['max-width'], 2)
+        new_image = cv2.resize(image, (target_size[0], target_size[1],),
+                               interpolation=RandomScalerAugmenter.PARAMETERS['interpolation'])
+        h, w, *_ = np.array(new_image.shape)
+        start = np.array([h // 2 - 16, w // 2 - 16])
+        end = start + 32
+        new_indices = np.hstack((start, end)).astype(int)
+        cropped = new_image[new_indices[0]:(new_indices[0] + 32), new_indices[1]:(new_indices[1] + 32), :]
+        return cropped
+
+    def process(self, data_set):
+        return augment(data_set, lambda img: self._scale_randomly(img))
