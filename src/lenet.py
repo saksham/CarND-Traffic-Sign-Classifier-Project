@@ -17,9 +17,9 @@ class Mode(Enum):
 
 HYPER_PARAMETERS = {
     'LEARNING_RATE': 0.001,
-    'EPOCHS': 50,
+    'EPOCHS': 100,
     'BATCH_SIZE': 256,
-    'KEEP_PROBABILITY_DURING_TRAINING': 0.60,
+    'KEEP_PROBABILITY_DURING_TRAINING': 0.5,
     'mu': 0,
     'sigma': 0.1
 }
@@ -61,19 +61,23 @@ def LeNet(x, mode):
     The LeNet architecture accepts a 32x32xC image as input, where C is the number of color channels. Since the images are grayscale, C is 1 in this case.
 
     * Layer 1:
-      * Convolutional: output shape is 28x28x6.
-      * Activation.ReLU
+        * Convolutional: output shape is 28x28x6.
+        * Activation.ReLU
+        * Dropout
     * Pooling (max): output shape is 14x14x6.
     * Layer 2:
         * Convolutional.output shape is 10x10x16.
         * Activation.ReLU
+        * Dropout
     * Pooling (max): output shape is 5x5x16.
     * Layer 3:
         * Fully Connected: number of outputs 120.
         * Activation.ReLU
+        * Dropout
     * Layer 4:
         * Fully Connected: number of outputs 84.
         * Activation.ReLU
+        * Dropout
     * Layer 5:
         * Fully Connected: number of outputs 43 (logits).
 
@@ -148,6 +152,7 @@ def LeNet(x, mode):
     fc3_W = tf.Variable(tf.truncated_normal(shape=(84, 43), mean=(HYPER_PARAMETERS['mu']), stddev=(
         HYPER_PARAMETERS['sigma'])))
     fc3_b = tf.Variable(tf.zeros(43))
+
     logits = tf.matmul(fc2, fc3_W) + fc3_b
 
     return logits
