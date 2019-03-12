@@ -11,6 +11,9 @@ logger = utils.get_logger('main')
 logger.info('-' * 200)
 logger.info('Loading data set...')
 training, validation, test = loading.load_all()
+
+# Convert to grayscale to save memory and processing time
+training, validation, test = [preprocessing.GrayScaleConverter().process(d) for d in [training, validation, test]]
 logger.info(utils.get_summary([training, validation]))
 
 # List of enabled data augmenters for training data set
@@ -26,7 +29,6 @@ print('Augmented training data: ', utils.get_summary([d_train]))
 
 # List of enabled data pre-processors
 PRE_PROCESSORS = [
-    preprocessing.GrayScaleConverter(),
     preprocessing.ZNormaliser(),
 ]
 

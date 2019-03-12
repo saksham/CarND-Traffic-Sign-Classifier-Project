@@ -4,7 +4,6 @@
 import pickle
 from collections import namedtuple
 
-
 DataSet = namedtuple('DataSet', ['name', 'X', 'y', 'count'])
 
 TRAINING_DATA_SET_FILE = './data/traffic-signs-data/train.p'

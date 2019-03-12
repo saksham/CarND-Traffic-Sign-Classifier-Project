@@ -17,8 +17,8 @@ class Mode(Enum):
 
 HYPER_PARAMETERS = {
     'LEARNING_RATE': 0.001,
-    'EPOCHS': 100,
-    'BATCH_SIZE': 128,
+    'EPOCHS': 50,
+    'BATCH_SIZE': 256,
     'KEEP_PROBABILITY_DURING_TRAINING': 0.60,
     'mu': 0,
     'sigma': 0.1

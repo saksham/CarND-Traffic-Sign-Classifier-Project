@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from abc import ABC
 
 import numpy as np
 from sklearn import utils
@@ -10,7 +11,7 @@ from src.utils import get_logger, ParameterizedProcessor
 logger = get_logger('Pre-processor')
 
 
-class PreProcessor(ParameterizedProcessor):
+class PreProcessor(ParameterizedProcessor, ABC):
     def __init__(self, name, parameters):
         super().__init__(name, parameters)
 
@@ -54,14 +55,14 @@ class MinMaxNormaliser(ParameterizedProcessor):
 
 
 class ZNormaliser(ParameterizedProcessor):
-    def __init__(self):
+    def __init__(self, mean=None, sigma=None):
         super().__init__('Z_NORMALISATION')
-        self._mean = None
-        self._sigma = None
+        self._mean = mean
+        self._sigma = sigma
 
     def process(self, data_set):
         if not self._mean:
-            logger.info('No means were calculated yet. Using score and mean from {}...'.format(data_set.name))
+            logger.info('No means were calculated yet. Calculating score and mean from {}...'.format(data_set.name))
             self._mean = np.mean(data_set.X)
             self._sigma = np.std(data_set.X)
         logger.info('Normalising {} with mean: {} and sigma: {}...'.format(data_set.name, self._mean, self._sigma))
