@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import json
 import logging
 import logging.handlers
 import math
@@ -12,8 +11,10 @@ from abc import ABC, abstractmethod
 import cv2
 import pandas as pd
 from matplotlib import pyplot as plt
+from sklearn import utils
 
 from src import loading
+from src.loading import DataSet
 
 LOG_FILE_PATH = 'data/logs/runs.txt'
 FORMAT = '[%(asctime)s] %(levelname)s %(message)s'
@@ -58,14 +59,6 @@ class ParameterizedProcessor(ABC):
     @property
     def info(self):
         return {'name': self._name, 'parameters': self._parameters}
-
-    @staticmethod
-    def apply(data_set, steps):
-        for s in steps:
-            ParameterizedProcessor._logger.info('Running {} on {} dataset...'.format(s.name, data_set.name))
-            ParameterizedProcessor._logger.info('\tParameters: {}'.format(json.dumps(s.parameters)))
-            data_set = s.process(data_set)
-        return data_set
 
 
 def get_sign_labels_map():
@@ -139,3 +132,8 @@ def plot_and_save(images, labels, filepath, n_cols=3):
             axs[i].set_title(labels[i])
 
     plt.savefig(filepath)
+
+
+def shuffle(data_set):
+    x, y = utils.shuffle(data_set.X, data_set.y)
+    return DataSet(data_set.name, x, y, data_set.count)

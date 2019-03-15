@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import json
 from abc import ABC
 
 import numpy as np
-from sklearn import utils
 
 from src.loading import DataSet
 from src.utils import get_logger, ParameterizedProcessor
@@ -14,6 +14,14 @@ logger = get_logger('Pre-processor')
 class PreProcessor(ParameterizedProcessor, ABC):
     def __init__(self, name, parameters):
         super().__init__(name, parameters)
+
+    @staticmethod
+    def apply(data_set, steps):
+        for s in steps:
+            logger.info('Running {} on {} dataset...'.format(s.name, data_set.name))
+            logger.info('\tParameters: {}'.format(json.dumps(s.parameters)))
+            data_set = s.process(data_set)
+        return data_set
 
 
 class GrayScaleConverter(ParameterizedProcessor):
@@ -45,15 +53,6 @@ class GrayScaleConverter(ParameterizedProcessor):
         return DataSet(data_set.name, x, data_set.y, data_set.count)
 
 
-class MinMaxNormaliser(ParameterizedProcessor):
-    def __init__(self):
-        super().__init__('MIN_MAX_NORMALISATION')
-
-    def process(self, data_set):
-        x = (data_set.X - 128) / 128
-        return DataSet(data_set.name, x, data_set.y, data_set.count)
-
-
 class ZNormaliser(ParameterizedProcessor):
     def __init__(self, mean=None, sigma=None):
         super().__init__('Z_NORMALISATION')
@@ -68,12 +67,3 @@ class ZNormaliser(ParameterizedProcessor):
         logger.info('Normalising {} with mean: {} and sigma: {}...'.format(data_set.name, self._mean, self._sigma))
         x = (data_set.X - self._mean) / self._sigma
         return DataSet(data_set.name, x, data_set.y, data_set.count)
-
-
-class DataShuffler(ParameterizedProcessor):
-    def __init__(self):
-        super().__init__('DATA_SHUFFLER')
-
-    def process(self, data_set):
-        x, y = utils.shuffle(data_set.X, data_set.y)
-        return DataSet(data_set.name, x, y, data_set.count)

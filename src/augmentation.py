@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from abc import ABC, abstractmethod
+
 import cv2
 import numpy as np
+import json
 
 from src.loading import DataSet
 from src.utils import get_logger, ParameterizedProcessor
@@ -10,92 +13,66 @@ from src.utils import get_logger, ParameterizedProcessor
 logger = get_logger('augmentation')
 
 
-def augment_data_set(data_set, augmenters):
-    result = DataSet(data_set.name, data_set.X, data_set.y, data_set.count)
-    for augmenter in augmenters:
-        result = augmenter.process(result)
-    return result
+class Augmenter(ParameterizedProcessor, ABC):
+    def __init__(self, name, parameters=None):
+        super().__init__(name, parameters)
+
+    @abstractmethod
+    def process_single_image(self, image):
+        raise Exception('Unimplemented')
+
+    def process(self, data_set):
+        m, h, w, c = data_set.X.shape
+        x = np.zeros((m, h, w, c), dtype=np.int)
+        y = np.zeros(m, dtype=np.int)
+        for i in range(m):
+            x[i] = self.process_single_image(data_set.X[i])
+            y[i] = data_set.y[i]
+        return DataSet(data_set.name, x, y, m)
+
+    @staticmethod
+    def apply(data_set, steps):
+        x = data_set.X
+        y = data_set.y
+        for s in steps:
+            logger.info('Running {} on {} dataset...'.format(s.name, data_set.name))
+            logger.info('\tParameters: {}'.format(json.dumps(s.parameters)))
+            processed = s.process(data_set)
+            x = np.concatenate([x, processed.X], axis=0)
+            y = np.concatenate([y, processed.y], axis=0)
+        return DataSet(data_set.name, x, y, len(x))
 
 
-def augment(data_set, transform_func):
-    m, h, w, c = data_set.X.shape
-    x = np.zeros((2 * m, h, w, c))
-    y = np.zeros((2 * m))
-    for i in range(m):
-        original_image = data_set.X[i, :]
-        x[i, :] = original_image
-        transformed = transform_func(original_image)
-        x[m + i, :] = transformed.reshape((h, w, c))
-        y[i] = data_set.y[i]
-        y[m + i] = data_set.y[i]
-    return DataSet(data_set.name, x, y, data_set.count * 2)
-
-
-class GaussianBlurAugmenter(ParameterizedProcessor):
+class GaussianBlurAugmenter(Augmenter):
     PARAMETERS = {
         'ksize': (3, 3),
-        'sigma': 0
     }
 
     def __init__(self):
         super().__init__('GAUSSIAN_BLUR', GaussianBlurAugmenter.PARAMETERS)
 
-    def process(self, data_set):
-        return augment(data_set, lambda x: cv2.blur(x.squeeze(), self.parameters['ksize'], self.parameters['sigma']))
+    def process_single_image(self, image):
+        return cv2.blur(image, ksize=self.parameters['ksize'])
 
 
-class AffineTransformAugmenter(ParameterizedProcessor):
+class AffineTransformAugmenter(Augmenter):
+    # Parameters from http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf
     PARAMETERS = {
         'TRANSLATION': [-2, 2],
         'SCALE': [0.9, 1.1],
-        'ROTATION': [-15, +15] #TODO: use rotation
-
+        'ROTATION_IN_DEGREES': [-15, +15]
     }
 
     def __init__(self):
         super().__init__('AFFINE_TRANSFORM_AUGMENTER', AffineTransformAugmenter.PARAMETERS)
 
-    @staticmethod
-    def _affine_transform(image):
+    def process_single_image(self, image):
         h, w, _ = image.shape
-        scale = AffineTransformAugmenter.PARAMETERS['SCALE']
-        s = np.random.rand(1) * (scale[1] - scale[0]) + scale[0]
-        translation = AffineTransformAugmenter.PARAMETERS['TRANSLATION']
-        dx, dy = np.random.randint(translation[0], translation[1], 2)
-        M = np.float32([[s, 0, dx], [0, s, dy]])
-        return cv2.warpAffine(image.squeeze(), M, (h, w))
+        assert h == w, "Only works with square images"
 
-    def process(self, data_set):
-        return augment(data_set, AffineTransformAugmenter._affine_transform)
+        scale = np.random.uniform(*AffineTransformAugmenter.PARAMETERS['SCALE'])
+        theta = np.random.uniform(*AffineTransformAugmenter.PARAMETERS['ROTATION_IN_DEGREES'])
+        center = np.random.uniform(*AffineTransformAugmenter.PARAMETERS['TRANSLATION'], 2) + h / 2
 
-
-class HorizontalFlipper(ParameterizedProcessor):
-    def __init__(self):
-        super().__init__('HORIZONTAL_FLIPPER')
-
-    def process(self, data_set):
-        return augment(data_set, lambda img: cv2.flip(img, 0))
-
-
-class RandomScalerAugmenter(ParameterizedProcessor):
-    PARAMETERS = {
-        'max-width': 40,
-        'interpolation': cv2.INTER_LANCZOS4
-    }
-
-    def __init__(self):
-        super().__init__('RANDOM_SCALER', RandomScalerAugmenter.PARAMETERS)
-
-    def _scale_randomly(self, image):
-        target_size = np.random.randint(32, RandomScalerAugmenter.PARAMETERS['max-width'], 2)
-        new_image = cv2.resize(image, (target_size[0], target_size[1],),
-                               interpolation=RandomScalerAugmenter.PARAMETERS['interpolation'])
-        h, w, *_ = np.array(new_image.shape)
-        start = np.array([h // 2 - 16, w // 2 - 16])
-        end = start + 32
-        new_indices = np.hstack((start, end)).astype(int)
-        cropped = new_image[new_indices[0]:(new_indices[0] + 32), new_indices[1]:(new_indices[1] + 32), :]
-        return cropped
-
-    def process(self, data_set):
-        return augment(data_set, lambda img: self._scale_randomly(img))
+        m = cv2.getRotationMatrix2D(tuple(center), theta, scale)
+        return cv2.warpAffine(image, m, (h, w))
