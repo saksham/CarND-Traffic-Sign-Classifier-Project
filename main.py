@@ -45,7 +45,6 @@ training_operation, accuracy_operation, logits = lenet.setup_graph(x, y, mode)
 logger.info('Hyper-parameters: %s', HYPER_PARAMETERS)
 from src.lenet import HYPER_PARAMETERS, Mode
 
-HYPER_PARAMETERS['EPOCHS'] = 0
 logger.info('Hyper-parameters: %s', HYPER_PARAMETERS)
 
 saver = tf.train.Saver()
