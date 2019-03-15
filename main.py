@@ -10,9 +10,6 @@ logger = utils.get_logger('main')
 logger.info('-' * 200)
 logger.info('Loading data set...')
 training, validation, test = loading.load_all()
-
-# Convert to grayscale to save memory and processing time
-training, validation, test = [preprocessing.GrayScaleConverter().process(d) for d in [training, validation, test]]
 logger.info(utils.get_summary([training, validation]))
 
 TRAINING_DATA_AUGMENTERS = [
@@ -48,6 +45,7 @@ training_operation, accuracy_operation, logits = lenet.setup_graph(x, y, mode)
 logger.info('Hyper-parameters: %s', HYPER_PARAMETERS)
 from src.lenet import HYPER_PARAMETERS, Mode
 
+HYPER_PARAMETERS['EPOCHS'] = 0
 logger.info('Hyper-parameters: %s', HYPER_PARAMETERS)
 
 saver = tf.train.Saver()

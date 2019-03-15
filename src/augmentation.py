@@ -26,7 +26,8 @@ class Augmenter(ParameterizedProcessor, ABC):
         x = np.zeros((m, h, w, c), dtype=np.int)
         y = np.zeros(m, dtype=np.int)
         for i in range(m):
-            x[i] = self.process_single_image(data_set.X[i])
+            processed = self.process_single_image(data_set.X[i])
+            x[i] = processed.reshape(h, w, c)
             y[i] = data_set.y[i]
         return DataSet(data_set.name, x, y, m)
 
