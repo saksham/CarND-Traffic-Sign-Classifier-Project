@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import tensorflow as tf
-from sklearn.utils import shuffle
 
 from src import loading, utils, lenet, preprocessing, augmentation
 from src.lenet import HYPER_PARAMETERS
@@ -16,19 +15,20 @@ training, validation, test = loading.load_all()
 training, validation, test = [preprocessing.GrayScaleConverter().process(d) for d in [training, validation, test]]
 logger.info(utils.get_summary([training, validation]))
 
-# List of enabled data augmenters for training data set
 TRAINING_DATA_AUGMENTERS = [
-    augmentation.HorizontalFlipper(),
-    augmentation.AffineTransformAugmenter(),
     augmentation.GaussianBlurAugmenter(),
-    augmentation.RandomScalerAugmenter()
+    augmentation.AffineTransformAugmenter(),
+    augmentation.AffineTransformAugmenter(),
+    augmentation.AffineTransformAugmenter(),
 ]
+# List of enabled data augmenters for training data set
 logger.info('Augmenting training data...')
-d_train = augmentation.augment_data_set(training, TRAINING_DATA_AUGMENTERS)
+d_train = augmentation.Augmenter.apply(training, TRAINING_DATA_AUGMENTERS)
 print('Augmented training data: ', utils.get_summary([d_train]))
 
 # List of enabled data pre-processors
 PRE_PROCESSORS = [
+    preprocessing.GrayScaleConverter(),
     preprocessing.ZNormaliser(),
 ]
 
@@ -50,9 +50,6 @@ from src.lenet import HYPER_PARAMETERS, Mode
 
 logger.info('Hyper-parameters: %s', HYPER_PARAMETERS)
 
-# TODO: this override is just for local testing - remove it in the final version
-HYPER_PARAMETERS['EPOCHS'] = 1
-
 saver = tf.train.Saver()
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
@@ -60,11 +57,10 @@ with tf.Session() as sess:
 
     logger.info("Training...")
     for i in range(HYPER_PARAMETERS['EPOCHS']):
-        X_train, y_train = shuffle(d_train.X, d_train.y)
-        training_accuracy = 0
+        d_train = utils.shuffle(d_train)
         for offset in range(0, num_examples, HYPER_PARAMETERS['BATCH_SIZE']):
             end = offset + HYPER_PARAMETERS['BATCH_SIZE']
-            batch_x, batch_y = X_train[offset:end], y_train[offset:end]
+            batch_x, batch_y = d_train.X[offset:end], d_train.y[offset:end]
             sess.run(training_operation, feed_dict={x: batch_x, y: batch_y, mode: Mode.TRAINING.value})
 
         training_accuracy = lenet.evaluation(d_train.X, d_train.y, x, y, mode, accuracy_operation)
