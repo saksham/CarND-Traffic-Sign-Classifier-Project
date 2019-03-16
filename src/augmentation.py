@@ -36,7 +36,7 @@ class Augmenter(ParameterizedProcessor, ABC):
         x = data_set.X
         y = data_set.y
         for s in steps:
-            logger.info('Running {} on {} dataset...'.format(s.name, data_set.name))
+            logger.info('Augmenting {} dataset using {}...'.format(data_set.name, s.name))
             logger.info('\tParameters: {}'.format(json.dumps(s.parameters)))
             processed = s.process(data_set)
             x = np.concatenate([x, processed.X], axis=0)

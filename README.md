@@ -94,7 +94,7 @@ activation layers and max-pooling layers.
 Performance of the original architecture on the training dataset was already satisfactory. However, the performance on
 the validation dataset was below par (minimum of 93% was required for the project). Tweaking learning rates or the number
 of epochs did not help. This was expected and the model showed signs of over-fitting. Drop-out layers were introduced 
-after each activation layer with the final keep probability of 50% to improve performance on the validation data set.
+after each activation layer to improve performance on the validation data set.
 
 To avoid dropping out during prediction, my model accepts an additional parameter called `mode` that can take one of the
 two values `TRAINING` or `PREDICTING` to enable or disable droput.
@@ -143,17 +143,17 @@ The final architecture was as follows. The source code is available at `LeNet` f
 | ----- | -------| ----- | ------- |
 | Input | 32x32xC | - | The model supports any number of channels |
 | Layer 1 Convolutional | 32x32xC| 28x28x6 | Valid padding with ReLU activation |
-| Layer 1 Pooling + Dropout | 28x28x6 | 14x14x6 | Max pooling, dropout with keep probability of 50% |
+| Layer 1 Pooling + Dropout | 28x28x6 | 14x14x6 | Max pooling and dropout layers |
 | Layer 2 Convolutional + activation | 14x14x6 | 10x10x16 | Valid padding with ReLU activation |
-| Layer 2 Pooling + Dropout | 10x10x16 | 5x5x16 | Max pooling, dropout with keep probability of 50% |
+| Layer 2 Pooling + Dropout | 10x10x16 | 5x5x16 | Max pooling and dropout layers |
 | Layer 3 Fully connected | 400 | 120 | Flattened output from previous layer as input with ReLU activation  |
-| Layer 3 Dropout | | | With 50% keep probability |
+| Layer 3 Dropout | | | With 70% keep probability |
 | Layer 4 Fully connected | 120 | 84 | With ReLU activation |
-| Layer 4 Dropout | | | With 50% keep probability |
+| Layer 4 Dropout | | | With 70% keep probability |
 | Layer 5 Fully connected | 84 | 43 | Outputs logits |
 
 As for the hyper-parameters, the starting values were chosen from the hand-writing recognition project from the course.
-With 50% keep probability for the dropout layers, the model was performing quite well. The starting values for the
+With 70% keep probability for the dropout layers, the model was performing quite well. The starting values for the
 weights in the network were chosen from a truncated normal distribution with mean (mu) 0 and standard deviation (sigma) 
 0.1.
 
@@ -162,7 +162,7 @@ weights in the network were chosen from a truncated normal distribution with mea
 | Learning rate   | 0.001 | Experimenting with 0.0009 gave slight but not so significant improvement in some cases. Learning was a bit slower though. So, 0.001 was chosen. |
 | Epochs          |   100 | The validation accuracy reached a plateau already at around 30-40 epochs |
 | Batch size      |   256 | Reached memory limits with bigger batch size |
-| Keep probability|   50% | Started with 80%, but lower value yielded in higher validation accuracy as expected. |
+| Keep probability|   70% | Started with 80%, but lower value yielded in higher validation accuracy as expected. |
 | mu              |     0 | Value inherited from MNIST dataset classification project |
 | sigma           |   0.1 | Value inherited from MNIST dataset classification project |
 

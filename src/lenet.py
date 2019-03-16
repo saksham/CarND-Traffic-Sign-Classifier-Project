@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from collections import namedtuple
 from enum import Enum
 
 import tensorflow as tf
 from tensorflow.contrib.layers import flatten
 
-from src.utils import get_logger
+from src.utils import get_logger, shuffle
 
 logger = get_logger('LeNet')
 
-
-class Mode(Enum):
-    TRAINING = 'TRAINING'
-    PREDICTING = 'PREDICTING'
+Placeholders = namedtuple('Placeholders', ['x', 'y', 'keep_probability'])
+Operations = namedtuple('Operations', ['logits', 'training', 'accuracy'])
 
 
 HYPER_PARAMETERS = {
@@ -25,34 +24,60 @@ HYPER_PARAMETERS = {
 }
 
 
-def evaluation(X_data, y_data, x, y, mode, accuracy_operation):
-    num_examples = len(X_data)
+def train_one_epoch(data_set, placeholders, operations):
+    num_examples = data_set.count
+    sess = tf.get_default_session()
+    data_set = shuffle(data_set)
+
+    for offset in range(0, num_examples, HYPER_PARAMETERS['BATCH_SIZE']):
+        end = offset + HYPER_PARAMETERS['BATCH_SIZE']
+        batch_x, batch_y = data_set.X[offset:end], data_set.y[offset:end]
+        sess.run(operations.training, feed_dict={
+            placeholders.x: batch_x,
+            placeholders.y: batch_y,
+            placeholders.keep_probability: HYPER_PARAMETERS['KEEP_PROBABILITY_DURING_TRAINING']
+        })
+
+
+def evaluate(data_set, placeholders, operations):
+    num_examples = data_set.count
     total_accuracy = 0
     sess = tf.get_default_session()
     batch_size = HYPER_PARAMETERS['BATCH_SIZE']
     for offset in range(0, num_examples, batch_size):
-        batch_x, batch_y = X_data[offset:offset + batch_size], y_data[offset:offset + batch_size]
-        accuracy = sess.run(accuracy_operation, feed_dict={x: batch_x, y: batch_y, mode: Mode.PREDICTING.value})
+        batch_x, batch_y = data_set.X[offset:offset + batch_size], data_set.y[offset:offset + batch_size]
+        accuracy = sess.run(operations.accuracy, feed_dict={
+            placeholders.x: batch_x,
+            placeholders.y: batch_y,
+            placeholders.keep_probability: 1
+        })
         total_accuracy += (accuracy * len(batch_x))
     return total_accuracy / num_examples
 
 
-def setup_graph(x, y, mode):
+def setup_graph():
+    x = tf.placeholder(tf.float32, (None, 32, 32, 1))
+    y = tf.placeholder(tf.int32, (None,))
+    keep_probability = tf.placeholder(tf.float32)
+
+    placeholders = Placeholders(x, y, keep_probability)
+
     one_hot_y = tf.one_hot(y, 43)
 
-    logits = LeNet(x, mode)
-    cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=one_hot_y, logits=logits)
+    logits_op = LeNet(x, keep_probability)
+    cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=one_hot_y, logits=logits_op)
     loss_operation = tf.reduce_mean(cross_entropy)
     optimizer = tf.train.AdamOptimizer(learning_rate=HYPER_PARAMETERS['LEARNING_RATE'])
-    training_operation = optimizer.minimize(loss_operation)
+    training_op = optimizer.minimize(loss_operation)
 
-    correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(one_hot_y, 1))
-    accuracy_operation = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    correct_prediction = tf.equal(tf.argmax(logits_op, 1), tf.argmax(one_hot_y, 1))
+    accuracy_op = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
-    return training_operation, accuracy_operation, logits
+    operations = Operations(logits_op, training_op, accuracy_op)
+    return placeholders, operations
 
 
-def LeNet(x, mode):
+def LeNet(x, keep_probability):
     """
     ### Model Architecture
     [LeNet-5](http://yann.lecun.com/exdb/lenet/) neural network architecture.
@@ -82,12 +107,13 @@ def LeNet(x, mode):
         * Fully Connected: number of outputs 43 (logits).
 
     :param x: Input to the network
+    :param keep_probability: keep probability for the droput
     :return: logits
     """
-    predicting_mode = tf.constant(Mode.PREDICTING.value)
-    keep_probability = tf.cond(tf.equal(mode, predicting_mode), lambda: 1.0,
-                               lambda: HYPER_PARAMETERS['KEEP_PROBABILITY_DURING_TRAINING'])
-    logger.info('Running LeNet in {} mode with keep probability of {}...'.format(mode, keep_probability))
+    logger.info('Running LeNet with keep probability of {}...'.format(keep_probability))
+
+    tf.logging.set_verbosity('INFO')
+    tf.logging.info(keep_probability)
 
     # Hyper parameters
     channels = x.shape[3].value
