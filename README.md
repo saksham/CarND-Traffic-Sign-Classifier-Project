@@ -160,8 +160,8 @@ weights in the network were chosen from a truncated normal distribution with mea
 | Hyper-parameter | Value | Comments  |
 | :-------------- | ------| :-------- |
 | Learning rate   | 0.001 | Experimenting with 0.0009 gave slight but not so significant improvement in some cases. Learning was a bit slower though. So, 0.001 was chosen. |
-| Epochs          |   100 | The validation accuracy reached a plateau already at around 30-40 epochs |
-| Batch size      |   256 | Reached memory limits with bigger batch size |
+| Epochs          |   50  | The validation accuracy reached a plateau already at around 30-40 epochs |
+| Batch size      |  1024 | An epoch of training took around 10s, which was good enough. |
 | Keep probability|   70% | Started with 80%, but lower value yielded in higher validation accuracy as expected. |
 | mu              |     0 | Value inherited from MNIST dataset classification project |
 | sigma           |   0.1 | Value inherited from MNIST dataset classification project |
@@ -169,7 +169,7 @@ weights in the network were chosen from a truncated normal distribution with mea
 Please refer to [runs.txt](data/logs/runs.txt) file for detail on how the accuracy was affected by various combinations
 of hyper-parameters.  
 
-Overall, the validation accuracy could reach upto **96%** with the chosen model and the hyper-parameters.
+Overall, the validation accuracy could reach upto **97%** with the chosen model and the hyper-parameters.
 
 <a name="performance-on-test-dataset"></a>
 ### Performance on Test Dataset
