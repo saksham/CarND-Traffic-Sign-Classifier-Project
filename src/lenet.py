@@ -32,7 +32,7 @@ def evaluation(X_data, y_data, x, y, mode, accuracy_operation):
     batch_size = HYPER_PARAMETERS['BATCH_SIZE']
     for offset in range(0, num_examples, batch_size):
         batch_x, batch_y = X_data[offset:offset + batch_size], y_data[offset:offset + batch_size]
-        accuracy = sess.run(accuracy_operation, feed_dict={x: batch_x, y: batch_y, mode: Mode.TRAINING.value})
+        accuracy = sess.run(accuracy_operation, feed_dict={x: batch_x, y: batch_y, mode: Mode.PREDICTING.value})
         total_accuracy += (accuracy * len(batch_x))
     return total_accuracy / num_examples
 
