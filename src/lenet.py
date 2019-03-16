@@ -17,7 +17,7 @@ Operations = namedtuple('Operations', ['logits', 'training', 'accuracy'])
 HYPER_PARAMETERS = {
     'LEARNING_RATE': 0.001,
     'EPOCHS': 100,
-    'BATCH_SIZE': 256,
+    'BATCH_SIZE': 512,
     'KEEP_PROBABILITY_DURING_TRAINING': 0.7,
     'mu': 0,
     'sigma': 0.1
@@ -111,9 +111,6 @@ def LeNet(x, keep_probability):
     :return: logits
     """
     logger.info('Running LeNet with keep probability of {}...'.format(keep_probability))
-
-    tf.logging.set_verbosity('INFO')
-    tf.logging.info(keep_probability)
 
     # Hyper parameters
     channels = x.shape[3].value

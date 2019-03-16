@@ -54,6 +54,7 @@ with tf.Session() as sess:
 
         training_accuracy = lenet.evaluate(d_train, placeholders, operations)
         validation_accuracy = lenet.evaluate(d_validation, placeholders, operations)
+
         logger.info("EPOCH {} ...".format(i + 1))
         logger.info("Accuracy on training dataset = {:.3f}".format(training_accuracy))
         logger.info("Validation Accuracy = {:.3f}".format(validation_accuracy))

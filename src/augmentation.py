@@ -50,7 +50,7 @@ class GaussianBlurAugmenter(Augmenter):
     }
 
     def __init__(self):
-        super().__init__('GAUSSIAN_BLUR', GaussianBlurAugmenter.PARAMETERS)
+        super().__init__('GAUSSIAN BLUR AUGMENTER', GaussianBlurAugmenter.PARAMETERS)
 
     def process_single_image(self, image):
         return cv2.blur(image, ksize=self.parameters['ksize'])
