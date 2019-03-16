@@ -39,9 +39,6 @@ d_validation = preprocessing.PreProcessor.apply(validation, PRE_PROCESSORS)
 tf.reset_default_graph()
 placeholders, operations = lenet.setup_graph()
 
-# TODO: remove this override
-HYPER_PARAMETERS['EPOCHS'] = 10
-
 logger.info('Hyper-parameters: %s', HYPER_PARAMETERS)
 
 saver = tf.train.Saver()
