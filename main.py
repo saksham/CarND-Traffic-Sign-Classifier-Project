@@ -58,7 +58,7 @@ with tf.Session() as sess:
         logger.info("EPOCH {} ...".format(i + 1))
         logger.info("Accuracy on training dataset = {:.3f}".format(training_accuracy))
         logger.info("Validation Accuracy = {:.3f}".format(validation_accuracy))
-        logger.info()
+        logger.info("")
 
     saver.save(sess, './data/model/lenet')
     logger.info("Model saved")
