@@ -3,7 +3,7 @@
 import tensorflow as tf
 
 from src import loading, utils, lenet, preprocessing, augmentation
-from src.lenet import HYPER_PARAMETERS
+from src.lenet import HYPER_PARAMETERS, Mode
 
 logger = utils.get_logger('main')
 
@@ -14,6 +14,8 @@ logger.info(utils.get_summary([training, validation]))
 
 TRAINING_DATA_AUGMENTERS = [
     augmentation.GaussianBlurAugmenter(),
+    augmentation.AffineTransformAugmenter(),
+    augmentation.AffineTransformAugmenter(),
     augmentation.AffineTransformAugmenter(),
     augmentation.AffineTransformAugmenter(),
     augmentation.AffineTransformAugmenter(),
@@ -41,9 +43,6 @@ y = tf.placeholder(tf.int32, (None))
 mode = tf.placeholder(tf.string, (None))
 
 training_operation, accuracy_operation, logits = lenet.setup_graph(x, y, mode)
-
-logger.info('Hyper-parameters: %s', HYPER_PARAMETERS)
-from src.lenet import HYPER_PARAMETERS, Mode
 
 logger.info('Hyper-parameters: %s', HYPER_PARAMETERS)
 
