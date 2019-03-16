@@ -96,6 +96,8 @@ the validation dataset was below par (minimum of 93% was required for the projec
 of epochs did not help. This was expected and the model showed signs of over-fitting. Drop-out layers were introduced 
 after each activation layer with the final keep probability of 50% to improve performance on the validation data set.
 
+To avoid dropping out during prediction, my model accepts an additional parameter called `mode` that can take one of the
+two values `TRAINING` or `PREDICTING` to enable or disable droput.
 #### Data Augmentation
 
 To enrich the training data set, multiple data augmentation techniques were tried out. Augmenting the training set with
@@ -105,7 +107,10 @@ augmenters that were tried out, refer to the git history of the file. The final 
 
 * 1x Gaussian Blur augmenter with kernel size of 3x3
 * 5x Affine transformation augmenter with random scaling and random rotations in the range of [0.9, 1.1]
- and [-15, 15] degrees respectively as described in Sermanet et. al. (reference below).
+ and [-15, 15] degrees respectively as described in Sermanet et. al. (reference below). The center for rotation
+ was picked with [-2, 2] pixels offset from the image center.
+ 
+ Together, they result in the training data for this project to be 6 times the original size. 
 
 #### Pre-processing
 
@@ -113,13 +118,16 @@ The images were converted to grayscale and Z-normalization was performed on the 
 found in [preprocessing.py](src/preprocessing.py). The mean and sigma were derived from the augmented training examples
 and the values were just used for pre-processing validation and test data sets.
 
+The channel weights for the RGB channels were `[0.299, 0.587, 0.114]` as suggested 
+[in this blog post](https://medium.com/@REInvestor/converting-color-images-to-grayscale-ab0120ea2c1e).
+
 From one of the runs, the Z-normalization values were as follows. The actual value differed based on the pixel values
-of after the augmentation, but the values were almost equal to the following up to two decimal places. The actual values
+of after the augmentation, but the values were almost equal to the following up to one decimal place. The actual values
 from each run can be found in the [run log](data/logs/run.txt).
 
 | Mean | Sigma |
 | ---- | ----- |
-|  77.32 | 65.13 |
+|  77.3 | 65.1 |
 
 The following shows two instances of training images before and after applying pre-processing. For both
 cases, the overall contrast seems to be preserved in the grayscale image and in the *Keep Right* case (the bottom image),
@@ -145,7 +153,7 @@ The final architecture was as follows. The source code is available at `LeNet` f
 | Layer 5 Fully connected | 84 | 43 | Outputs logits |
 
 As for the hyper-parameters, the starting values were chosen from the hand-writing recognition project from the course.
-With 50% keep probability of the dropout layers, the model was performing quite well. The starting values for the
+With 50% keep probability for the dropout layers, the model was performing quite well. The starting values for the
 weights in the network were chosen from a truncated normal distribution with mean (mu) 0 and standard deviation (sigma) 
 0.1.
 
@@ -166,6 +174,8 @@ Overall, the validation accuracy could reach upto **96%** with the chosen model 
 <a name="performance-on-test-dataset"></a>
 ### Performance on Test Dataset
 
+Performance on the test data set with the aforementioned settings and architecture was ** %**.
+
 <a name="make-prediction-on-new-images"></a>
 ### Make prediction on new images
 
@@ -175,5 +185,5 @@ Overall, the validation accuracy could reach upto **96%** with the chosen model 
 
 References
 ==========
-* LeCun, Yann. "LeNet-5, convolutional neural networks." URL: http://yann.lecun.com/exdb/lenet/ (2015).
+* LeCun, Yann. "LeNet-5, convolutional neural networks." URL: http://yann.lecun.com/exdb/lenet/
 * Sermanet, Pierre, and Yann LeCun. "Traffic sign recognition with multi-scale Convolutional Networks." IJCNN. 2011. URL: http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf
