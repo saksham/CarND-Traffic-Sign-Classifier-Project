@@ -149,8 +149,8 @@ With 50% keep probability of the dropout layers, the model was performing quite 
 weights in the network were chosen from a truncated normal distribution with mean (mu) 0 and standard deviation (sigma) 
 0.1.
 
-| Hyper-parameter | Value | Comments |
-| :-------------- | ------|: --------|
+| Hyper-parameter | Value | Comments  |
+| :-------------- | ------| :-------- |
 | Learning rate   | 0.001 | Experimenting with 0.0009 gave slight but not so significant improvement in some cases. Learning was a bit slower though. So, 0.001 was chosen. |
 | Epochs          |   100 | The validation accuracy reached a plateau already at around 30-40 epochs |
 | Batch size      |   256 | Reached memory limits with bigger batch size |
