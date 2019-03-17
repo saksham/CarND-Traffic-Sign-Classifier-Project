@@ -97,9 +97,9 @@ the validation dataset was below par (minimum of 93% was required for the projec
 of epochs did not help. This was expected and the model showed signs of over-fitting. Drop-out layers were introduced 
 after each activation layer to improve performance on the validation data set.
 
-To avoid dropping out during prediction, my model accepts an additional parameter called `mode` that can take one of the
-two values `TRAINING` or `PREDICTING` to enable or disable droput.
-#### Data Augmentation
+To avoid dropping out during prediction, my model accepts an additional parameter called `keep_probability` that uses
+either the value from hyper-parameter dictionary from [lenet.py](src/lenet.py) during training, or the value is set to 
+`1` while predicting.
 
 To enrich the training data set, multiple data augmentation techniques were tried out. Augmenting the training set with
 horizontally flipped, randomly scaled and rotated, gaussian blurred copies of the provided examples resulted in generally
