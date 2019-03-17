@@ -13,9 +13,9 @@ The basic structure of the project is as follows. This report summarizes the res
 * [Loading the data set](#loading-the-dataset)
 * [Exploration, summary and visualization of the data set](#exploring-the-dataset)
 * [Design, train and validate a model architecture](#model-architecture)
-* [Performance on Test Dataset](#performance-on-test-dataset)
 * [Use the model to make predictions on new images](#make-prediction-on-new-images)
 * [Analyze the softmax probabilities of the new images](#analyze-predictions-on-new-images)
+* [Performance on Test Dataset](#performance-on-test-dataset)
 
 *NOTE*: All the dependencies and lab environment required for reproducing the results presented in this report can be created with [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit).
 
@@ -171,17 +171,56 @@ of hyper-parameters.
 
 Overall, the validation accuracy could reach upto **97%** with the chosen model and the hyper-parameters.
 
-<a name="performance-on-test-dataset"></a>
-### Performance on Test Dataset
-
-Performance on the test data set with the aforementioned settings and architecture was ** %**.
-
 <a name="make-prediction-on-new-images"></a>
 ### Make prediction on new images
+
+Five images were downloaded from the Internet by searching for "traffic signs" in Google Images Search. I randomly picked
+images from signs that were in the list in [signnames.csv](data/signnames.csv). I did not really select any 
+particular characteristic in the traffic signs that I chose.
+
+The images were cropped to just show the signs, and the canvas size was changed to 32x32 as required by the model. 
+[GIMP](https://www.gimp.org) tool was chosen for this task.
+
+Here are all the images that were downloaded after they have been cropped and resized.
+
+![images-from-internet](docs/images/images-from-internet-resized.jpg)
 
 <a name="analyze-predictions-on-new-images"></a>
 ### Analyze Predictions on new Images
 
+| Actual Traffic Sign | Predicted Sign | Probability | Match |
+| ------------------- | -------------- | ----------- | ----- |
+| Speed limit (50km/h) | Speed limit (30km/h) | 0.992 | :x:  |
+| Speed limit (70km/h) | Speed limit (70km/h) | 0.499 | :white_check_mark: |
+| Priority road | Priority road | 0.999 | :white_check_mark: |
+| Right-of-way at the next intersection | Right-of-way at the next intersection | 0.999 | :white_check_mark: |
+| Turn right ahead | Turn right ahead | 1.0 | :white_check_mark: | 
+
+The following graphic shows the soft-max probabilities for the signs. The full list of predictions can be found in
+ [the notebook](Main.ipynb).
+
+![softmax-predictions-images-from-internet](docs/images/softmax-probabilities-on-images-from-internet.jpg)
+
+Although it might appear that the accuracy for the images downloaded from the Internet is **80%**, the model really
+gets confused with the numbers inside speed limit signs. It got the first sign wrong and the second sign was almost 
+tipping over wrongly to 20km/h instead of 70km/h. This could have been due to mismatch in quality of the signs
+in the training dataset and the test image from the Internet. Furthermore, the signs might not even have been
+European signs.
+
+I specifically looked for traffic signs showing speed limits from European roads and I found an 80km/h speed limit
+from a French road. Running prediction on that sign yielded better results. To improve the overall performance of the 
+model it would make sense to maybe apply contrast filters to highlight the contents of the signs even more.
+
+The following graphic shows the soft-max probabilities on the 80km/h sign.
+
+![softmax-probability-on-max-80-sign](docs/images/softmax-probabilities-on-max-80-sign.jpg)
+ 
+
+<a name="performance-on-test-dataset"></a>
+### Performance on the Test Dataset
+
+Finally, I ran evaluation on the test dataset. Performance on the test data set with the aforementioned settings and 
+architecture was **95.2%**.
 
 References
 ==========
