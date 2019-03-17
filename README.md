@@ -170,7 +170,7 @@ weights in the network were chosen from a truncated normal distribution with mea
 Please refer to [runs.txt](data/logs/runs.txt) file for detail on how the accuracy was affected by various combinations
 of hyper-parameters.  
 
-Overall, the validation accuracy could reach upto **97%** with the chosen model and the hyper-parameters.
+Overall, the validation accuracy reached over **97%** with the chosen model and the hyper-parameters.
 
 <a name="make-prediction-on-new-images"></a>
 ### Make prediction on new images
@@ -191,8 +191,8 @@ Here are all the images that were downloaded after they have been cropped and re
 
 | Actual Traffic Sign | Predicted Sign | Probability | Match |
 | ------------------- | -------------- | ----------- | ----- |
-| Speed limit (50km/h) | Speed limit (30km/h) | 0.992 | :x:  |
-| Speed limit (70km/h) | Speed limit (70km/h) | 0.499 | :white_check_mark: |
+| Speed limit (50km/h) | Speed limit (30km/h) | 0.50 | :x:  |
+| Speed limit (70km/h) | Speed limit (70km/h) | 1.0 | :white_check_mark: |
 | Priority road | Priority road | 0.999 | :white_check_mark: |
 | Right-of-way at the next intersection | Right-of-way at the next intersection | 0.999 | :white_check_mark: |
 | Turn right ahead | Turn right ahead | 1.0 | :white_check_mark: | 
@@ -204,7 +204,7 @@ The following graphic shows the soft-max probabilities for the signs. The full l
 
 Although it might appear that the accuracy for the images downloaded from the Internet is **80%**, the model really
 gets confused with the numbers inside speed limit signs. It got the first sign wrong and the second sign was almost 
-tipping over wrongly to 20km/h instead of 70km/h. This could have been due to mismatch in quality of the signs
+tipping over wrongly to 20km/h instead of 70km/h in some runs. This could have been due to mismatch in quality of the signs
 in the training dataset and the test image from the Internet. Furthermore, the signs might not even have been
 European signs.
 
