@@ -15,6 +15,7 @@ The basic structure of the project is as follows. This report summarizes the res
 * [Design, train and validate a model architecture](#model-architecture)
 * [Use the model to make predictions on new images](#make-prediction-on-new-images)
 * [Analyze the softmax probabilities of the new images](#analyze-predictions-on-new-images)
+* [Remarks](#remarks)
 * [Performance on Test Dataset](#performance-on-test-dataset)
 
 *NOTE*: All the dependencies and lab environment required for reproducing the results presented in this report can be created with [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit).
@@ -215,6 +216,12 @@ The following graphic shows the soft-max probabilities on the 80km/h sign.
 
 ![softmax-probability-on-max-80-sign](docs/images/softmax-probabilities-on-max-80-sign.jpg)
  
+<a name="remarks"></a>
+### Remarks
+
+Due to time constraint, I skipped visualising layers using the `outputFeatureMap` function. Investigating how the network
+learnt particularly the traffic signs with speed limits could shed a bit more light on why they are not
+distinguished with high confidence.
 
 <a name="performance-on-test-dataset"></a>
 ### Performance on the Test Dataset
